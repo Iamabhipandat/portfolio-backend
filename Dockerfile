@@ -1,7 +1,21 @@
-FROM eclipse-temurin:21-jdk
+# Build stage
+FROM maven:3.9-eclipse-temurin-21 AS build
+
 WORKDIR /app
-COPY . .
 
-RUN ./mvnw clean package -DskipTests
+COPY pom.xml .
+COPY src ./src
 
-ENTRYPOINT ["java", "-jar", "target/portfolio-backend-0.0.1-SNAPSHOT.jar"]
+RUN mvn clean package -DskipTests
+
+
+# Run stage
+FROM eclipse-temurin:21-jre
+
+WORKDIR /app
+
+COPY --from=build /app/target/*.jar app.jar
+
+EXPOSE 8080
+
+ENTRYPOINT ["java", "-jar", "app.jar"]ar", "target/portfolio-backend-0.0.1-SNAPSHOT.jar"]
